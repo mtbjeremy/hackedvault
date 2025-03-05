@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HackedVault - Scan Results</title>
+    <link rel="stylesheet" href="/styles.css">
+    <style>
+        .scan-results-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-top: 2rem;
+        }
+
+        .scan-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .status-filter {
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            font-size: 0.9rem;
+        }
+
+        .scan-grid {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .scan-grid-header {
+            display: grid;
+            grid-template-columns: auto 2fr 1fr 1fr 1fr 1fr 1fr 1fr;
+            gap: 1rem;
+            padding: 1rem;
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: bold;
+        }
+
+        .scan-grid-row {
+            display: grid;
+            grid-template-columns: auto 2fr 1fr 1fr 1fr 1fr 1fr 1fr;
+            gap: 1rem;
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+            align-items: center;
+        }
+
+        .scan-grid-row:last-child {
+            border-bottom: none;
+        }
+
+        .scan-grid-row:hover {
+            background-color: #f8f9fa;
+        }
+
+        .scan-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.875rem;
+            text-align: center;
+            width: fit-content;
+            cursor: help;
+        }
+
+        .scan-status.safe {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .scan-status.unsafe {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .scan-status.disabled {
+            background: #e5e7eb;
+            color: #4b5563;
+        }
+
+        .action-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .file-status {
+            font-size: 0.875rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .file-status.saved {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .file-status.deleted {
+            background: #fecaca;
+            color: #991b1b;
+        }
+
+        .security-mode {
+            font-size: 0.875rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            text-align: center;
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .scan-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .scan-tag {
+            background: #e5e7eb;
+            color: #4b5563;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+        }
+
+        .no-results {
+            padding: 2rem;
+            text-align: center;
+            color: #666;
+            background: #f8f9fa;
+            border-radius: 0 0 8px 8px;
+        }
+
+        .error-message {
+            padding: 1rem;
+            text-align: center;
+            color: var(--danger-color);
+            background: #fff3f3;
+            border-radius: 4px;
+        }
+
+        @media (max-width: 1200px) {
+            .scan-grid-header, .scan-grid-row {
+                grid-template-columns: auto 2fr 1fr 1fr;
+                gap: 0.5rem;
+            }
+
+            .scan-grid-row > div:nth-child(n+5) {
+                grid-column: span 2;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .scan-grid-header {
+                display: none;
+            }
+
+            .scan-grid-row {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+                padding: 1rem;
+            }
+
+            .scan-grid-row > div {
+                grid-column: 1 !important;
+                padding: 0.25rem 0;
+            }
+
+            .scan-grid-row .scan-tags {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.25rem;
+                margin-top: 0.5rem;
+            }
+
+            .scan-header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .status-filter {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="nav-container"></div>
+
+    <div class="container">
+        <div class="scan-results-section">
+            <div class="scan-header">
+                <h2>File Scan History</h2>
+                <select id="statusFilter" class="status-filter">
+                    <option value="all">All Files</option>
+                    <option value="safe">Safe Files</option>
+                    <option value="unsafe">Unsafe Files</option>
+                    <option value="disabled">Not Scanned</option>
+                </select>
+            </div>
+
+            <div class="scan-grid">
+                <div class="scan-grid-header">
+                    <div>Status</div>
+                    <div>File Name</div>
+                    <div>Size</div>
+                    <div>Action Taken</div>
+                    <div>File Status</div>
+                    <div>Security Mode</div>
+                    <div>Tags</div>
+                    <div>Timestamp</div>
+                </div>
+                <div id="scanList" class="scan-grid-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const username = localStorage.getItem('username');
+        const password = localStorage.getItem('password');
+
+        if (!username || !password) {
+            window.location.href = '/login';
+        }
+
+        fetch('/components/nav.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('nav-container').innerHTML = html;
+                const userInfo = document.getElementById('userInfo');
+                if (userInfo) {
+                    userInfo.textContent = `Logged in as: ${username}`;
+                }
+                document.querySelector('a[href="/scan-results"]')?.classList.add('active');
+            });
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 B';
+            const units = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(1024));
+            return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${units[i]}`;
+        }
+
+        function getScanStatusClass(scan) {
+            if (scan.tags.includes('scan_disabled') || scan.isSafe === null) {
+                return 'disabled';
+            }
+            return scan.isSafe ? 'safe' : 'unsafe';
+        }
+
+        function getScanStatusText(scan) {
+            if (scan.tags.includes('scan_disabled') || scan.isSafe === null) {
+                return '⚪ Not Scanned';
+            }
+            return scan.isSafe ? '✓ Safe' : '⚠ Unsafe';
+        }
+
+        function getScanStatusTitle(scan) {
+            if (scan.tags.includes('scan_disabled') || scan.isSafe === null) {
+                return 'File was not scanned - Scanning disabled';
+            }
+            return scan.isSafe ? 'File is safe' : 'File is unsafe';
+        }
+
+        function loadScanResults(filter = 'all') {
+            fetch('/api/scan-results', {
+                headers: {
+                    'Authorization': 'Basic ' + btoa(username + ':' + password)
+                }
+            })
+            .then(response => response.json())
+            .then(scans => {
+                const filteredScans = scans.filter(scan => {
+                    if (filter === 'all') return true;
+                    if (filter === 'safe') return scan.isSafe === true;
+                    if (filter === 'unsafe') return scan.isSafe === false;
+                    if (filter === 'disabled') return scan.isSafe === null || scan.tags.includes('scan_disabled');
+                    return true;
+                });
+
+                const scanList = document.getElementById('scanList');
+                scanList.innerHTML = filteredScans.length === 0 ? 
+                    '<div class="no-results">No scan results found</div>' :
+                    filteredScans.map(scan => `
+                        <div class="scan-grid-row">
+                            <div>
+                                <div class="scan-status ${getScanStatusClass(scan)}" 
+                                    title="${getScanStatusTitle(scan)}">
+                                    ${getScanStatusText(scan)}
+                                </div>
+                            </div>
+                            <div class="scan-filename">${scan.filename}</div>
+                            <div>${formatFileSize(scan.size)}</div>
+                            <div class="action-badge" title="${scan.action}">
+                                ${scan.action}
+                            </div>
+                            <div>
+                                <span class="file-status ${scan.fileStatus.toLowerCase()}" title="${scan.fileStatus}">
+                                    ${scan.fileStatus}
+                                </span>
+                            </div>
+                            <div>
+                                <span class="security-mode" title="Security mode at time of scan">
+                                    ${scan.securityMode.charAt(0).toUpperCase() + scan.securityMode.slice(1)}
+                                </span>
+                            </div>
+                            <div class="scan-tags">
+                                ${scan.tags.map(tag => `
+                                    <span class="scan-tag">${tag}</span>
+                                `).join('')}
+                            </div>
+                            <div>${new Date(scan.timestamp).toLocaleString()}</div>
+                        </div>
+                    `).join('');
+            })
+            .catch(error => {
+                console.error('Error loading scan results:', error);
+                document.getElementById('scanList').innerHTML = 
+                    '<div class="error-message">Error loading scan results</div>';
+            });
+        }
+
+        document.getElementById('statusFilter').addEventListener('change', (e) => {
+            loadScanResults(e.target.value);
+        });
+
+        window.handleLogout = function() {
+            localStorage.removeItem('username');
+            localStorage.removeItem('password');
+        }
+
+        loadScanResults();
+        setInterval(() => loadScanResults(document.getElementById('statusFilter').value), 30000);
+    </script>
+</body>
+</html>

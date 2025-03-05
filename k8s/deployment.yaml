@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hackedvault-deployment
+  labels:
+    app: hackedvault
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hackedvault
+  template:
+    metadata:
+      labels:
+        app: hackedvault
+    spec:
+      containers:
+      - name: hackedvault
+        image: ${ECR_REGISTRY}/${ECR_REPOSITORY}:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: ADMIN_USERNAME
+          valueFrom:
+            configMapKeyRef:
+              name: hackedvault-config
+              key: admin-username
+        - name: USER_USERNAME
+          valueFrom:
+            configMapKeyRef:
+              name: hackedvault-config
+              key: user-username
+        - name: ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: hackedvault-secrets
+              key: admin-password
+        - name: USER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: hackedvault-secrets
+              key: user-password
+        volumeMounts:
+        - name: uploads-volume
+          mountPath: /app/uploads
+      volumes:
+      - name: uploads-volume
+        emptyDir: {}
