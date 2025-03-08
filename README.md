@@ -135,12 +135,12 @@ HackedVault supports two authentication methods:
 #### Upload File
 ```bash
 # Upload with user account
-curl -X POST http://localhost:3000/upload \
+curl -X POST http://localhost:3000/api/upload \
   -u "user:your_password" \
   -F "file=@/path/to/your/file.txt"
 
 # Upload with admin account (if configured)
-curl -X POST http://localhost:3000/upload \
+curl -X POST http://localhost:3000/api/upload \
   -u "admin:admin_password" \
   -F "file=@/path/to/your/file.txt"
 
@@ -192,7 +192,7 @@ curl -X POST http://localhost:3000/api/config \
 
 #### List Files
 ```bash
-curl http://localhost:3000/files -u "user:your_password"
+curl http://localhost:3000/api/files -u "user:your_password"
 ```
 
 #### Get Scan Results
@@ -202,12 +202,12 @@ curl http://localhost:3000/api/scan-results -u "user:your_password"
 
 #### Get System Health
 ```bash
-curl http://localhost:3000/health -u "user:your_password"
+curl http://localhost:3000/api/health -u "user:your_password"
 ```
 
 #### Delete File
 ```bash
-curl -X DELETE http://localhost:3000/files/filename.txt -u "user:your_password"
+curl -X DELETE http://localhost:3000/api/files/filename.txt -u "user:your_password"
 ```
 
 ## Environment Variables
